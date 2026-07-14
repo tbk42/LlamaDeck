@@ -1,0 +1,25 @@
+services:
+  ollama-manager:
+    build: .
+    container_name: ollama-manager
+    ports:
+      - "11435:11435"
+    volumes:
+      # Docker socket so the manager can discover and docker-exec into
+      # sibling Ollama containers.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      # Persist registered instances and config across restarts.
+      - ollama-manager-config:/root/.config/ollama-manager
+
+      # Optional: mount a host GGUF directory so the GGUF library feature
+      # can browse local models. Adjust the host path to match your setup.
+      # - /path/to/gguf-models:/gguf-models:ro
+
+    environment:
+      - OLLAMA_MANAGER_HOST=0.0.0.0
+      - OLLAMA_MANAGER_PORT=11435
+    restart: unless-stopped
+
+volumes:
+  ollama-manager-config:

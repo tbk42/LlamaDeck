@@ -1,0 +1,295 @@
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Any
+
+import httpx
+
+
+class OllamaClient:
+    def __init__(
+        self,
+        instance_type: str,
+        *,
+        url: str = "http://localhost:11434",
+        container_id: str | None = None,
+        api_key: str | None = None,
+        gguf_dir: str | None = None,
+        container_gguf_dir: str | None = None,
+    ) -> None:
+        self.type = instance_type
+        self.url = url.rstrip("/")
+        self.container_id = container_id
+        self.api_key = api_key
+        self.gguf_dir = gguf_dir
+        self.container_gguf_dir = container_gguf_dir
+
+    # -- helpers --
+
+    def _headers(self) -> dict[str, str]:
+        h = {"Content-Type": "application/json"}
+        if self.api_key:
+            h["Authorization"] = f"Bearer {self.api_key}"
+        return h
+
+    def _run_ollama(self, args: list[str]) -> subprocess.CompletedProcess:
+        if self.type == "docker" and self.container_id:
+            cmd = ["docker", "exec", self.container_id, "ollama"] + args
+        else:
+            cmd = ["ollama"] + args
+        return subprocess.run(cmd, capture_output=True, text=True)
+
+    # -- model listing --
+
+    def list_models(self) -> list[dict[str, Any]]:
+        if self.type in ("docker", "local"):
+            r = self._run_ollama(["list", "--format", "json"])
+            if r.returncode == 0 and r.stdout.strip():
+                return self._parse_list_json(r.stdout)
+            r = self._run_ollama(["list"])
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+            return self._parse_list_text(r.stdout)
+        else:
+            data = self._api_get("/api/tags")
+            return data.get("models", data if isinstance(data, list) else [])
+
+    def _parse_list_json(self, text: str) -> list[dict[str, Any]]:
+        import json
+
+        data = json.loads(text)
+        models = data if isinstance(data, list) else data.get("models", [])
+        result = []
+        for m in models:
+            details = m.get("details") or {}
+            result.append({
+                "name": m.get("name", ""),
+                "size": m.get("size", 0),
+                "modified": m.get("modified_at", ""),
+                "family": details.get("family"),
+                "parameter_size": details.get("parameter_size"),
+                "quantization_level": details.get("quantization_level"),
+            })
+        return result
+
+    def _parse_list_text(self, text: str) -> list[dict[str, Any]]:
+        models = []
+        for line in text.strip().split("\n")[1:]:
+            if not line.strip():
+                continue
+            parts = line.split()
+            if len(parts) < 4:
+                continue
+            models.append({
+                "name": parts[0],
+                "size": parts[2],
+                "modified": parts[3],
+            })
+        return models
+
+    # -- model inspect --
+
+    def inspect_model(self, name: str) -> dict[str, Any]:
+        if self.type in ("docker", "local"):
+            r = self._run_ollama(["show", name])
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+            return {"modelfile": r.stdout}
+        else:
+            return self._api_get(f"/api/show", {"model": name})
+
+    # -- model delete --
+
+    def delete_model(self, name: str) -> None:
+        if self.type in ("docker", "local"):
+            r = self._run_ollama(["rm", name])
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+        else:
+            self._api_delete("/api/delete", {"model": name})
+
+    # -- pull from registry --
+
+    def pull_model(self, name: str) -> None:
+        if self.type in ("docker", "local"):
+            r = self._run_ollama(["pull", name])
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+        else:
+            self._api_post("/api/pull", {"model": name})
+
+    # -- import GGUF --
+
+    def import_gguf(self, gguf_path: str, model_name: str) -> None:
+        if self.type == "docker" and self.container_id:
+            self._docker_import(gguf_path, model_name)
+        elif self.type == "local":
+            self._local_import(gguf_path, model_name)
+        else:
+            raise RuntimeError("GGUF import only supported for local/docker instances")
+
+    def _docker_import(self, gguf_path: str, model_name: str) -> None:
+        gguf_path = Path(gguf_path).resolve()
+        gguf_name = gguf_path.name
+
+        # Try shared-volume path via container_gguf_dir
+        container_file = self._resolve_container_path(gguf_path)
+        if container_file:
+            container_dir = str(Path(container_file).parent)
+            with tempfile.TemporaryDirectory() as tmpdir:
+                modelfile = Path(tmpdir) / "Modelfile"
+                modelfile.write_text(f"FROM {container_file}\n")
+                subprocess.run(
+                    ["docker", "cp", str(modelfile), f"{self.container_id}:{container_dir}/Modelfile"],
+                    check=True, capture_output=True, text=True,
+                )
+                r = subprocess.run(
+                    ["docker", "exec", self.container_id, "ollama", "create", model_name, "-f", f"{container_dir}/Modelfile"],
+                    capture_output=True, text=True,
+                )
+                subprocess.run(
+                    ["docker", "exec", self.container_id, "rm", f"{container_dir}/Modelfile"],
+                    capture_output=True,
+                )
+                if r.returncode != 0:
+                    raise RuntimeError(r.stderr.strip())
+                return
+
+        # Fallback: docker cp the GGUF file into the container
+        container_path = f"/tmp/ollama-import/{gguf_name}"
+        subprocess.run(
+            ["docker", "exec", self.container_id, "mkdir", "-p", "/tmp/ollama-import"],
+            capture_output=True,
+        )
+        subprocess.run(
+            ["docker", "cp", str(gguf_path), f"{self.container_id}:{container_path}"],
+            check=True, capture_output=True, text=True,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            modelfile = Path(tmpdir) / "Modelfile"
+            modelfile.write_text(f"FROM {container_path}\n")
+            subprocess.run(
+                ["docker", "cp", str(modelfile), f"{self.container_id}:/tmp/ollama-import/Modelfile"],
+                check=True, capture_output=True, text=True,
+            )
+            r = subprocess.run(
+                ["docker", "exec", self.container_id, "ollama", "create", model_name, "-f", "/tmp/ollama-import/Modelfile"],
+                capture_output=True, text=True,
+            )
+            subprocess.run(
+                ["docker", "exec", self.container_id, "rm", "-rf", "/tmp/ollama-import"],
+                capture_output=True,
+            )
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+
+    def _resolve_container_path(self, host_path: Path) -> str | None:
+        if not self.gguf_dir or not self.container_gguf_dir:
+            return None
+        host_dir = Path(self.gguf_dir).resolve()
+        try:
+            relative = host_path.relative_to(host_dir)
+        except ValueError:
+            return None
+        return f"{self.container_gguf_dir.rstrip('/')}/{relative}"
+
+    def _local_import(self, gguf_path: str, model_name: str) -> None:
+        gguf_path = Path(gguf_path).resolve()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            modelfile = Path(tmpdir) / "Modelfile"
+            modelfile.write_text(f"FROM {gguf_path}\n")
+            r = subprocess.run(
+                ["ollama", "create", model_name, "-f", str(modelfile)],
+                capture_output=True, text=True,
+            )
+            if r.returncode != 0:
+                raise RuntimeError(r.stderr.strip())
+
+    # -- pull from HuggingFace --
+
+    def pull_from_huggingface(self, url: str, hf_token: str | None = None) -> None:
+        import httpx
+
+        headers = {}
+        if hf_token:
+            headers["Authorization"] = f"Bearer {hf_token}"
+
+        gguf_path = None
+        try:
+            with httpx.Client(follow_redirects=True, timeout=300) as client:
+                resp = client.get(url, headers=headers)
+                resp.raise_for_status()
+
+                with tempfile.NamedTemporaryFile(suffix=".gguf", delete=False) as tmp:
+                    tmp.write(resp.content)
+                    gguf_path = tmp.name
+
+            name = suggest_name(gguf_path)
+            self.import_gguf(gguf_path, name)
+        finally:
+            if gguf_path:
+                Path(gguf_path).unlink(missing_ok=True)
+
+    # -- GGUF library --
+
+    def list_gguf_files(self) -> list[dict[str, Any]]:
+        gguf_dir = self.gguf_dir
+        if not gguf_dir or not Path(gguf_dir).is_dir():
+            return []
+        files = []
+        for f in sorted(Path(gguf_dir).rglob("*.gguf")):
+            stat = f.stat()
+            files.append({
+                "path": str(f),
+                "name": f.name,
+                "size": stat.st_size,
+                "modified": stat.st_mtime,
+            })
+        return files
+
+    # -- HTTP API wrappers --
+
+    def _api_get(self, path: str, params: dict | None = None) -> Any:
+        with httpx.Client(base_url=self.url, headers=self._headers()) as client:
+            r = client.get(path, params=params)
+            r.raise_for_status()
+            return r.json()
+
+    def _api_post(self, path: str, data: dict) -> Any:
+        with httpx.Client(base_url=self.url, headers=self._headers()) as client:
+            r = client.post(path, json=data)
+            r.raise_for_status()
+            return r.json()
+
+    def _api_delete(self, path: str, data: dict) -> Any:
+        with httpx.Client(base_url=self.url, headers=self._headers()) as client:
+            r = client.request("DELETE", path, json=data)
+            r.raise_for_status()
+            return r.json()
+
+
+def suggest_name(gguf_path: str) -> str:
+    name = Path(gguf_path).stem
+    for prefix in [
+        "google_", "microsoft_", "openai_", "meta-llama_",
+        "Qwen_", "Mistral_", "Instinct_",
+    ]:
+        if name.startswith(prefix):
+            name = name[len(prefix):]
+    import re
+    name = re.sub(r"-[Qq][0-9]+(_[A-Za-z0-9]+)+$", "", name)
+    name = re.sub(r"-?[Mm][Xx][Ff][Pp]4$", "", name)
+    name = name.lower().replace("_", "")
+    return name
+
+
+def name_exists(client: OllamaClient, name: str) -> bool:
+    try:
+        models = client.list_models()
+        return any(m["name"].split(":")[0] == name for m in models)
+    except RuntimeError:
+        return False

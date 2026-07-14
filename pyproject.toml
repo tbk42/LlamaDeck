@@ -1,0 +1,13 @@
+[project]
+name = "ollama-manager"
+version = "1.0.0"
+description = "Web UI for managing Ollama models"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "aiofiles>=24.0",
+    "httpx>=0.27.0",
+    "python-multipart>=0.0.18",
+    "cryptography>=42.0.0",
+]
