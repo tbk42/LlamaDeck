@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LlamaDeck</title>
   <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/logo.svg">
 </head>
 <body>
   <header>
-    <h1><span>Llama</span>Deck</h1>
+    <h1 style="display:flex;align-items:center;gap:10px;"><img src="/static/logo.svg" alt="" style="display:block;"><span>Llama</span>Deck</h1>
     <nav>
       <button data-page="models">Models</button>
       <button data-page="import">Import GGUF</button>
@@ -32,6 +33,7 @@
         <table>
           <thead>
             <tr>
+              <th class="col-del"></th>
               <th class="sortable" data-sort="name">Name <span class="sort-arrow"></span></th>
               <th class="sortable" data-sort="family">Family <span class="sort-arrow"></span></th>
               <th class="sortable" data-sort="param">Params <span class="sort-arrow"></span></th>

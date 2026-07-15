@@ -157,11 +157,11 @@ async function loadModels() {
     const models = sortModels(raw);
     tbody.innerHTML = models.map(m => `
       <tr>
+        <td class="col-del">
+          <button class="btn-del" onclick="deleteModel('${escapeHtml(m.name)}')" title="Delete">&#128465;</button>
+        </td>
         <td>
           <a class="model-name" onclick="inspectModel('${escapeHtml(m.name)}')">${m.name}</a>
-          <span class="model-actions">
-            <button class="btn btn-icon btn-danger" onclick="event.stopPropagation();deleteModel('${escapeHtml(m.name)}')" title="Delete">&#128465;</button>
-          </span>
         </td>
         <td>${m.family || '—'}</td>
         <td>${m.parameter_size || '—'}</td>
