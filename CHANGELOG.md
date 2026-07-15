@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-15
+
+### Changed
+- Repository fully rewritten with new name **LlamaDeck** (was `ollama-model-manager`)
+- Git history cleaned: no traces of old project name in any commit
+- Docker image now published as `ghcr.io/tbk42/llamadeck`
+
 ## [0.1.0] - 2026-07-15
 
 ### Added
@@ -50,4 +57,5 @@
 - `_normalize_arch()` incorrectly matched `qwen2` as `qwen2moe` — now checks exact matches before prefix matches
 - `_normalize_arch()` failed to match `command_r` (underscore in known name) — now normalizes both sides of comparison
 
+[0.1.1]: https://github.com/tbk42/LlamaDeck/releases/tag/v0.1.1
 [0.1.0]: https://github.com/tbk42/LlamaDeck/releases/tag/v0.1.0
