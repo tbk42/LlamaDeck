@@ -40,7 +40,8 @@ docker compose up -d
 ```
 
 An Ollama container must also be running on the same host for the manager to discover. The manager connects via the Docker socket to discover and communicate with sibling Ollama containers.
-On Windows (Docker Desktop), set `DOCKER_SOCKET=//./pipe/docker_engine` in `.env` before starting.
+On Windows, use **WSL 2** — `/var/run/docker.sock` is available there natively.
+Native Windows (Docker Desktop named pipes) is **not supported** for Docker socket discovery; register Ollama as a remote instance instead.
 
 ## Configuration
 
