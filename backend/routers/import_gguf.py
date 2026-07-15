@@ -48,6 +48,7 @@ async def upload_gguf(request: Request):
             self.field_name = ""
             self.field_value = bytearray()
             self.filename = ""
+            self.is_file_part = False
 
         def on_part_begin(self):
             self._hdr_name = b""
@@ -56,19 +57,22 @@ async def upload_gguf(request: Request):
             self.field_name = ""
             self.field_value = bytearray()
             self.filename = ""
+            self.is_file_part = False
 
         def on_header_field(self, data, start, end):
             self._hdr_name = data[start:end].lower()
 
         def on_header_value(self, data, start, end):
-            if self._hdr_name == b"content-disposition":
-                self._disposition = data[start:end]
+            self._hdr_val.extend(data[start:end])
 
         def on_header_end(self):
-            pass
+            if self._hdr_name == b"content-disposition":
+                self._disposition = bytes(self._hdr_val)
+            self._hdr_name = b""
+            self._hdr_val = bytearray()
 
         def on_headers_finished(self):
-            nonlocal instance_id, model_name, dest, dest_file
+            nonlocal dest, dest_file
             if self._disposition:
                 params = parse_options_header(self._disposition)[1]
                 self.field_name = unquote(params.get(b"name", b"").decode("latin-1"))
@@ -77,20 +81,21 @@ async def upload_gguf(request: Request):
                     self.filename = unquote(self.filename.decode("latin-1"))
                     if not self.filename.lower().endswith(".gguf"):
                         raise HTTPException(400, "Only .gguf files are accepted")
+                    self.is_file_part = True
                     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                     dest = UPLOAD_DIR / self.filename
                     dest_file = open(dest, "wb")
 
         def on_part_data(self, data, start, end):
             chunk = data[start:end]
-            if dest_file:
+            if dest_file and self.is_file_part:
                 dest_file.write(chunk)
             else:
                 self.field_value.extend(chunk)
 
         def on_part_end(self):
             nonlocal instance_id, model_name
-            if dest_file is None:
+            if not self.is_file_part:
                 val = self.field_value.decode("latin-1") if self.field_value else ""
                 if self.field_name == "instance_id":
                     instance_id = val
