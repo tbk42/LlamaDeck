@@ -1,5 +1,5 @@
 [project]
-name = "ollama-manager"
+name = "llamadeck"
 version = "1.0.0"
 description = "Web UI for managing Ollama models"
 requires-python = ">=3.10"

@@ -1,7 +1,7 @@
 services:
   ollama-manager:
     build: .
-    container_name: ollama-manager
+    container_name: llamadeck
     ports:
       - "11435:11435"
     volumes:
