@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.gitignore
+.gitattributes
+.env
+.env.example
+*.md
+LICENSE

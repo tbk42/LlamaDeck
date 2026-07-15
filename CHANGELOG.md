@@ -35,3 +35,5 @@
 - HuggingFace pull using temp file path as model name — now extracts name from GGUF metadata or URL filename
 - `requirements.md` reference to non-existent `/unified/GGUF Models/import.sh`
 - `.env` added to `.gitignore` to prevent accidental secret commits
+- `AGENTS.md` removed from repo (git-ignored) to avoid confusing end users
+- `.dockerignore` added to exclude `.venv/`, `__pycache__/`, `.git/` from Docker build context
