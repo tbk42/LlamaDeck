@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-CONFIG_DIR = Path.home() / ".config" / "ollama-manager"
+CONFIG_DIR = Path.home() / ".config" / "llamadeck"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 DB_PATH = CONFIG_DIR / "instances.db"
 

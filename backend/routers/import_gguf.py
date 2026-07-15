@@ -14,7 +14,7 @@ from backend.services.task_manager import start_background
 
 router = APIRouter(prefix="/api/import", tags=["import"])
 
-UPLOAD_DIR = Path(tempfile.gettempdir()) / "ollama-manager-uploads"
+UPLOAD_DIR = Path(tempfile.gettempdir()) / "llamadeck-uploads"
 CHUNK_SIZE = 1024 * 1024
 
 

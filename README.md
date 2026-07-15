@@ -49,7 +49,7 @@ Native Windows (Docker Desktop named pipes) is **not supported** for Docker sock
 |---|---|
 | CLI flags | `python -m backend.main --port 8080 --host 127.0.0.1` |
 | Environment | `OLLAMA_MANAGER_HOST=0.0.0.0 OLLAMA_MANAGER_PORT=11435` |
-| Config file | `~/.config/ollama-manager/config.json` |
+| Config file | `~/.config/llamadeck/config.json` |
 
 ## Architecture
 
@@ -60,7 +60,7 @@ Browser → FastAPI + SPA (port 11435) → [docker exec | local ollama | HTTP AP
 - **Backend**: Python/FastAPI with async endpoints and background task workers
 - **Frontend**: Vanilla JS SPA served by FastAPI (dark theme)
 - **Persistence**: SQLite for instances, separate encrypted SQLite for credentials
-- **Credentials**: Stored in `~/.config/ollama-manager/credentials.db`, encrypted with Fernet + PBKDF2, file permissions 600
+- **Credentials**: Stored in `~/.config/llamadeck/credentials.db`, encrypted with Fernet + PBKDF2, file permissions 600
 
 ### Instance Types
 

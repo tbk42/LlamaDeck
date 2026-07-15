@@ -1,5 +1,5 @@
 services:
-  ollama-manager:
+  llamadeck:
     build: .
     container_name: llamadeck
     ports:
@@ -13,7 +13,7 @@ services:
       - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:ro
 
       # Persist registered instances and config across restarts.
-      - ollama-manager-config:/root/.config/ollama-manager
+      - llamadeck-config:/root/.config/llamadeck
 
       # GGUF models directory — change the host path to match your setup.
       - ./GGUF-Models:/GGUF:ro
@@ -24,4 +24,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  ollama-manager-config:
+  llamadeck-config:

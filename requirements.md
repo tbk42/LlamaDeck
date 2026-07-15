@@ -32,7 +32,7 @@ Build a fully functional web UI for managing Ollama models — Runs independentl
 
 ### API Key Storage
 
-- API keys (HuggingFace, remote Ollama instances) stored in a dedicated config file at `~/.config/ollama-manager/credentials.json`
+- API keys (HuggingFace, remote Ollama instances) stored in a dedicated config file at `~/.config/llamadeck/credentials.json`
 - File permissions set to `600` (owner read/write only)
 - Encryption at rest is best-effort (future enhancement: OS keychain integration via libsecret/Keychain)
 
