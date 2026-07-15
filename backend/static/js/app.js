@@ -517,6 +517,50 @@ function formatSize(bytes) {
   return `${size.toFixed(1)} ${units[i]}`;
 }
 
+// --- Welcome dialog ---
+async function showWelcomeDialog() {
+  const modal = document.getElementById('modal');
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div style="text-align:center;padding:8px 0;">
+      <h3 style="margin-bottom:8px;">Welcome to LlamaDeck</h3>
+      <p style="color:#8b949e;font-size:14px;margin-bottom:20px;">
+        No Ollama instances are configured yet. Would you like to connect one now?
+      </p>
+      <button class="btn btn-primary" id="welcome-discover" style="display:block;width:100%;margin-bottom:8px;padding:10px;font-size:14px;">
+        Auto-Discover
+      </button>
+      <button class="btn" id="welcome-manual" style="display:block;width:100%;margin-bottom:8px;padding:10px;font-size:14px;">
+        Add Manually
+      </button>
+      <button class="btn" id="welcome-skip" style="display:block;width:100%;padding:10px;font-size:14px;">
+        Neither — I'll set it up later
+      </button>
+    </div>
+  `;
+  modal.classList.add('open');
+
+  document.getElementById('welcome-discover').addEventListener('click', async () => {
+    closeModal();
+    await discoverInstances();
+    await loadInstanceSelector();
+    if (instances.length === 0) {
+      toast('No instances found. Try adding one manually.', 'info');
+    }
+    showPage('instances');
+  });
+
+  document.getElementById('welcome-manual').addEventListener('click', () => {
+    closeModal();
+    setTimeout(() => showAddInstance(), 100);
+  });
+
+  document.getElementById('welcome-skip').addEventListener('click', () => {
+    closeModal();
+    showPage('instances');
+  });
+}
+
 // --- Init ---
 document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('header nav button[data-page]').forEach(btn => {
@@ -529,6 +573,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (e.target === e.currentTarget) closeModal();
   });
   await loadInstanceSelector();
+  if (instances.length === 0) {
+    showWelcomeDialog();
+  }
   showPage('models');
   const defaultTh = document.querySelector('th.sortable[data-sort="name"]');
   if (defaultTh) defaultTh.classList.add('asc');
