@@ -302,11 +302,21 @@ class OllamaClient:
     # -- GGUF library --
 
     def list_gguf_files(self) -> list[dict[str, Any]]:
-        gguf_dir = self.container_gguf_dir if self.container_gguf_dir and Path(self.container_gguf_dir).is_dir() else self.gguf_dir
-        if not gguf_dir or not Path(gguf_dir).is_dir():
-            return []
+        candidates = []
+        if self.container_gguf_dir:
+            candidates.append(("container", self.container_gguf_dir))
+        if self.gguf_dir:
+            candidates.append(("host", self.gguf_dir))
+        best = []
+        for label, path in candidates:
+            d = Path(path)
+            if not d.is_dir():
+                continue
+            found = sorted(d.rglob("*.gguf"))
+            if len(found) > len(best):
+                best = found
         files = []
-        for f in sorted(Path(gguf_dir).rglob("*.gguf")):
+        for f in best:
             stat = f.stat()
             meta = read_gguf_meta(f)
             files.append({
