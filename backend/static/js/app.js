@@ -160,7 +160,7 @@ async function loadModels() {
         <td>
           <a class="model-name" onclick="inspectModel('${escapeHtml(m.name)}')">${m.name}</a>
           <span class="model-actions">
-            <button class="btn btn-xs btn-danger" onclick="event.stopPropagation();deleteModel('${escapeHtml(m.name)}')">Del</button>
+            <button class="btn btn-icon btn-danger" onclick="event.stopPropagation();deleteModel('${escapeHtml(m.name)}')" title="Delete">&#128465;</button>
           </span>
         </td>
         <td>${m.family || '—'}</td>
