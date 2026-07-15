@@ -243,9 +243,10 @@ def _read_value(f):
 
 def _normalize_arch(arch: str) -> str:
     arch = arch.lower().replace("-", "").replace("_", "")
-    for known in ARCH_MAP:
-        if arch == known:
-            return known
-        if known.startswith(arch) or arch.startswith(known):
+    normals = {known.lower().replace("-", "").replace("_", ""): known for known in ARCH_MAP}
+    if arch in normals:
+        return normals[arch]
+    for k, known in sorted(normals.items(), key=lambda x: -len(x[0])):
+        if k.startswith(arch) or arch.startswith(k):
             return known
     return arch
