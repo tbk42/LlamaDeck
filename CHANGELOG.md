@@ -27,3 +27,4 @@
 - GGUF Library returning no files from Docker because host `gguf_dir` path was inaccessible — now uses `container_gguf_dir` when available
 - Upload failing from Docker because `/unified/tmp` didn't exist inside the container
 - Models table size column missing units (e.g., "5.1" instead of "5.1 GB")
+- HuggingFace pull using temp file path as model name — now extracts name from GGUF metadata or URL filename

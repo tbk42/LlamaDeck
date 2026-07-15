@@ -262,7 +262,12 @@ class OllamaClient:
                     tmp.write(resp.content)
                     gguf_path = tmp.name
 
-            name = suggest_name(gguf_path)
+            meta = read_gguf_meta(gguf_path)
+            name = (
+                meta.get("label")
+                or Path(url).stem.replace(".gguf", "").lower().replace("_", "").replace("-instruct", "")
+                or suggest_name(gguf_path)
+            )
             self.import_gguf(gguf_path, name)
         finally:
             if gguf_path:
