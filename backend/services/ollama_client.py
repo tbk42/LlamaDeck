@@ -86,10 +86,12 @@ class OllamaClient:
             parts = line.split()
             if len(parts) < 4:
                 continue
+            size_str = f"{parts[2]} {parts[3]}" if len(parts) > 3 else parts[2]
+            modified = " ".join(parts[4:]) if len(parts) > 4 else ""
             models.append({
                 "name": parts[0],
-                "size": parts[2],
-                "modified": parts[3],
+                "size": size_str,
+                "modified": modified,
             })
         for m in models:
             self._enrich_model_details(m)

@@ -14,6 +14,8 @@
 - Upload temp directory moved to `/unified/tmp` to avoid disk space issues on small tmpfs partitions
 - GGUF library card layout redesigned with filename/size top row, model name/family middle row, and params/quant/context info row
 - Enhanced `list_gguf_files()` endpoint returns richer metadata per file
+- `list_gguf_files()` now prefers `container_gguf_dir` over `gguf_dir` when set, so Docker instances resolve GGUF paths correctly
+- Size column in models table now includes the unit (GB/MB) parsed from `ollama list` text output
 
 ### Fixed
 - GGUF upload failing with "No space left on device" when `/tmp` partition was too small
@@ -21,3 +23,7 @@
 - GGUF array metadata parsing in header reader (handles typed arrays correctly without desync)
 - GGUF metadata fallback from filename when file_type header values don't match known quantization labels
 - Multipart parser ignoring form fields (instance_id, model_name) sent after the file field — `is_file_part` flag now resets per-part instead of relying on global `dest_file` state
+- Docker auto-discover failing inside container because `docker` CLI was not installed — added `docker-cli` package to Dockerfile
+- GGUF Library returning no files from Docker because host `gguf_dir` path was inaccessible — now uses `container_gguf_dir` when available
+- Upload failing from Docker because `/unified/tmp` didn't exist inside the container
+- Models table size column missing units (e.g., "5.1" instead of "5.1 GB")
