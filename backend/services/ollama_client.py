@@ -43,7 +43,18 @@ class OllamaClient:
             cmd = ["docker", "exec", self.container_id, "ollama"] + args
         else:
             cmd = ["ollama"] + args
-        return subprocess.run(cmd, capture_output=True, text=True)
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True)
+        except FileNotFoundError:
+            binary = cmd[0]
+            if binary == "ollama":
+                raise RuntimeError(
+                    "Ollama is not installed or not on PATH. "
+                    "Install it from https://ollama.com or start the Ollama application."
+                )
+            raise RuntimeError(
+                f"'{binary}' was not found. Make sure it is installed and on PATH."
+            )
 
     # -- model listing --
 
@@ -166,6 +177,15 @@ class OllamaClient:
         else:
             raise RuntimeError("GGUF import only supported for local/docker instances")
 
+    def _run_docker(self, args: list[str], **kwargs) -> subprocess.CompletedProcess:
+        try:
+            return subprocess.run(["docker"] + args, **kwargs)
+        except FileNotFoundError:
+            raise RuntimeError(
+                "Docker is not installed or not on PATH. "
+                "Install Docker Desktop from https://docker.com."
+            )
+
     def _docker_import(self, gguf_path: str, model_name: str) -> None:
         gguf_path = Path(gguf_path).resolve()
         gguf_name = gguf_path.name
@@ -177,16 +197,16 @@ class OllamaClient:
             with tempfile.TemporaryDirectory() as tmpdir:
                 modelfile = Path(tmpdir) / "Modelfile"
                 modelfile.write_text(f"FROM {container_file}\n")
-                subprocess.run(
-                    ["docker", "cp", str(modelfile), f"{self.container_id}:{container_dir}/Modelfile"],
+                self._run_docker(
+                    ["cp", str(modelfile), f"{self.container_id}:{container_dir}/Modelfile"],
                     check=True, capture_output=True, text=True,
                 )
-                r = subprocess.run(
-                    ["docker", "exec", self.container_id, "ollama", "create", model_name, "-f", f"{container_dir}/Modelfile"],
+                r = self._run_docker(
+                    ["exec", self.container_id, "ollama", "create", model_name, "-f", f"{container_dir}/Modelfile"],
                     capture_output=True, text=True,
                 )
-                subprocess.run(
-                    ["docker", "exec", self.container_id, "rm", f"{container_dir}/Modelfile"],
+                self._run_docker(
+                    ["exec", self.container_id, "rm", f"{container_dir}/Modelfile"],
                     capture_output=True,
                 )
                 if r.returncode != 0:
@@ -195,27 +215,27 @@ class OllamaClient:
 
         # Fallback: docker cp the GGUF file into the container
         container_path = f"/tmp/ollama-import/{gguf_name}"
-        subprocess.run(
-            ["docker", "exec", self.container_id, "mkdir", "-p", "/tmp/ollama-import"],
+        self._run_docker(
+            ["exec", self.container_id, "mkdir", "-p", "/tmp/ollama-import"],
             capture_output=True,
         )
-        subprocess.run(
-            ["docker", "cp", str(gguf_path), f"{self.container_id}:{container_path}"],
+        self._run_docker(
+            ["cp", str(gguf_path), f"{self.container_id}:{container_path}"],
             check=True, capture_output=True, text=True,
         )
         with tempfile.TemporaryDirectory() as tmpdir:
             modelfile = Path(tmpdir) / "Modelfile"
             modelfile.write_text(f"FROM {container_path}\n")
-            subprocess.run(
-                ["docker", "cp", str(modelfile), f"{self.container_id}:/tmp/ollama-import/Modelfile"],
+            self._run_docker(
+                ["cp", str(modelfile), f"{self.container_id}:/tmp/ollama-import/Modelfile"],
                 check=True, capture_output=True, text=True,
             )
-            r = subprocess.run(
-                ["docker", "exec", self.container_id, "ollama", "create", model_name, "-f", "/tmp/ollama-import/Modelfile"],
+            r = self._run_docker(
+                ["exec", self.container_id, "ollama", "create", model_name, "-f", "/tmp/ollama-import/Modelfile"],
                 capture_output=True, text=True,
             )
-            subprocess.run(
-                ["docker", "exec", self.container_id, "rm", "-rf", "/tmp/ollama-import"],
+            self._run_docker(
+                ["exec", self.container_id, "rm", "-rf", "/tmp/ollama-import"],
                 capture_output=True,
             )
             if r.returncode != 0:
@@ -236,10 +256,16 @@ class OllamaClient:
         with tempfile.TemporaryDirectory() as tmpdir:
             modelfile = Path(tmpdir) / "Modelfile"
             modelfile.write_text(f"FROM {gguf_path}\n")
-            r = subprocess.run(
-                ["ollama", "create", model_name, "-f", str(modelfile)],
-                capture_output=True, text=True,
-            )
+            try:
+                r = subprocess.run(
+                    ["ollama", "create", model_name, "-f", str(modelfile)],
+                    capture_output=True, text=True,
+                )
+            except FileNotFoundError:
+                raise RuntimeError(
+                    "Ollama is not installed or not on PATH. "
+                    "Install it from https://ollama.com or start the Ollama application."
+                )
             if r.returncode != 0:
                 raise RuntimeError(r.stderr.strip())
 
