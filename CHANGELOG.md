@@ -1,35 +1,22 @@
 # Changelog
 
-## [1.0.0] — 2026-07-14
-
-Initial release.
+## [Unreleased]
 
 ### Added
+- GGUF header parsing — quantization, family, parameter size, model name, and context length extracted directly from GGUF files without importing
+- GGUF library cards now show metadata: model name, family, parameter count, quantization, and context length in a structured layout
+- Sortable columns in the models table — click Name, Family, Params, Quantization, or Size headers to sort
+- Parameter count estimation from architecture metadata when `general.size_label` is missing (handles dense and MoE architectures)
+- Context length detection from architecture-specific metadata keys
 
-- List Ollama models with name, family, parameter count, quantization, size
-- Import GGUF via browser upload or filesystem path
-- Delete models with confirmation dialog
-- Inspect models (view modelfile via `ollama show`)
-- Pull models from Ollama registry
-- Pull models from HuggingFace (URL-based, optional API key)
-- GGUF library browser — browse local `.gguf` files and import
-- Multiple instance support (local, Docker, remote)
-- Auto-discovery of Docker containers and local `ollama` installs
-- Instance CRUD with SQLite persistence
-- Encrypted credential storage (Fernet + PBKDF2, SQLite, `chmod 600`)
-- Background task system for long-running operations (pull, import)
-- Dark-theme single-page application frontend
-- Configurable port/host via CLI flags, environment variables, or config file
-- Docker support with socket-based container discovery and `docker cp` fallback
+### Changed
+- GGUF upload now streams directly to the final destination file, eliminating temporary file double-write
+- Upload temp directory moved to `/unified/tmp` to avoid disk space issues on small tmpfs partitions
+- GGUF library card layout redesigned with filename/size top row, model name/family middle row, and params/quant/context info row
+- Enhanced `list_gguf_files()` endpoint returns richer metadata per file
 
 ### Fixed
-
-- HuggingFace download temp file leak on HTTP error (wrapped in `try/finally`)
-- Model DELETE request body not being sent (frontend `API.del` signature)
-- OOM risk on GGUF upload (streamed in 1MB chunks instead of `file.read()`)
-- TOCTOU race on credential storage (moved from JSON to transactional SQLite)
-- Docker GGUF import not mounting the `.gguf` file (hybrid: shared volume path or `docker cp`)
-- Self-circular import in `pull_from_huggingface`
-- Deprecated `on_event` lifespan pattern (migrated to FastAPI lifespan context manager)
-- Dockerfile dependency drift (now uses `requirements.txt`)
-- Docker compose env vars not wired to app config
+- GGUF upload failing with "No space left on device" when `/tmp` partition was too small
+- GGUF upload failing with "There was an error parsing the body" due to missing `python-multipart` dependency in server runtime
+- GGUF array metadata parsing in header reader (handles typed arrays correctly without desync)
+- GGUF metadata fallback from filename when file_type header values don't match known quantization labels

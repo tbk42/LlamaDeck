@@ -50,6 +50,11 @@ table {
 }
 th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #21262d; font-size: 13px; }
 th { background: #1c2128; color: #8b949e; font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: .05em; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: #f0f6fc; }
+th.sortable .sort-arrow { margin-left: 4px; font-size: 10px; }
+th.sortable.asc .sort-arrow::after { content: "▲"; }
+th.sortable.desc .sort-arrow::after { content: "▼"; }
 td { color: #c9d1d9; }
 tr:hover td { background: #1c2128; }
 tr:last-child td { border-bottom: none; }
@@ -106,14 +111,22 @@ pre.modelfile {
 .instance-card .info { display: flex; align-items: center; gap: 12px; }
 .instance-card .actions { display: flex; gap: 6px; }
 
-.gguf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.gguf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 .gguf-card {
   background: #161b22; border: 1px solid #30363d; border-radius: 8px;
-  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  padding: 14px; display: flex; flex-direction: column; gap: 6px;
 }
-.gguf-card .name { font-size: 13px; font-weight: 500; color: #f0f6fc; word-break: break-all; }
-.gguf-card .meta { font-size: 11px; color: #8b949e; }
-.gguf-card .actions { display: flex; gap: 6px; margin-top: 4px; }
+.gguf-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gguf-card-filename { font-size: 13px; font-weight: 600; color: #f0f6fc; word-break: break-all; flex: 1; min-width: 0; }
+.gguf-card-size { font-size: 11px; color: #8b949e; white-space: nowrap; }
+.gguf-card-mid { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gguf-card-family { font-size: 11px; color: #58a6ff; white-space: nowrap; }
+.gguf-card-model { font-size: 12px; color: #c9d1d9; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gguf-card-info { font-size: 11px; color: #8b949e; display: flex; justify-content: space-between; }
+.gguf-card-info .ginfo-left { flex: 1; text-align: left; }
+.gguf-card-info .ginfo-center { flex: 1; text-align: center; }
+.gguf-card-info .ginfo-right { flex: 1; text-align: right; }
+.gguf-card .actions { display: flex; gap: 6px; margin-top: 2px; }
 
 .spinner {
   display: inline-block; width: 16px; height: 16px;

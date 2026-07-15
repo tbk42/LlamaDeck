@@ -10,7 +10,9 @@ Web UI for managing Ollama models — list, import GGUF, pull from registry/Hugg
 - **Inspect** — view modelfile via `ollama show`
 - **Pull from registry** — pull models from Ollama's library
 - **Pull from HuggingFace** — paste a download URL, optional API key for gated models
-- **GGUF library** — browse local GGUF files and import with one click
+- **GGUF library** — browse local GGUF files with auto-detected metadata (family, parameter count, quantization, context length, model name) and import with one click
+- **Sortable columns** — click any column header in the models table to sort by name, family, params, quantization, or size
+- **GGUF header parsing** — extracts quantization, architecture family, parameter count, context length, and model name directly from GGUF file metadata without importing
 - **Multiple instances** — register local, Docker, or remote Ollama instances
 - **Auto-discovery** — detects running Ollama Docker containers and local installs
 - **Background tasks** — long operations (pull, import) run asynchronously with status polling
@@ -66,7 +68,7 @@ Browser → FastAPI + SPA (port 11435) → [docker exec | local ollama | HTTP AP
 |---|---|
 | `GET /api/instances` | List registered instances |
 | `GET /api/instances/discover` | Auto-discover local/docker instances |
-| `GET /api/models/{id}` | List models for an instance |
+| `GET /api/models/{id}` | List models for an instance (sortable columns in UI) |
 | `POST /api/pull/registry` | Pull from Ollama registry (async, returns task_id) |
 | `POST /api/pull/huggingface` | Pull from HuggingFace URL (async) |
 | `POST /api/import/upload` | Upload and import GGUF file (async) |

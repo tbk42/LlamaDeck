@@ -9,6 +9,8 @@ from typing import Any
 
 import httpx
 
+from backend.services.gguf_parser import read_gguf_meta
+
 
 class OllamaClient:
     def __init__(
@@ -89,7 +91,37 @@ class OllamaClient:
                 "size": parts[2],
                 "modified": parts[3],
             })
+        for m in models:
+            self._enrich_model_details(m)
         return models
+
+    def _enrich_model_details(self, model: dict[str, Any]) -> None:
+        try:
+            r = self._run_ollama(["show", model["name"], "--format", "json"])
+            if r.returncode == 0 and r.stdout.strip():
+                import json
+                data = json.loads(r.stdout)
+                details = data.get("details") or {}
+                model["family"] = details.get("family")
+                model["parameter_size"] = details.get("parameter_size")
+                model["quantization_level"] = details.get("quantization_level")
+                return
+        except Exception:
+            pass
+        try:
+            r = self._run_ollama(["show", model["name"]])
+            if r.returncode != 0:
+                return
+            for line in r.stdout.split("\n"):
+                line = line.strip()
+                if line.startswith("architecture") and "family" not in model:
+                    model["family"] = line.split(None, 1)[-1].strip()
+                elif line.startswith("parameters") and "parameter_size" not in model:
+                    model["parameter_size"] = line.split(None, 1)[-1].strip()
+                elif line.startswith("quantization") and "quantization_level" not in model:
+                    model["quantization_level"] = line.split(None, 1)[-1].strip()
+        except Exception:
+            pass
 
     # -- model inspect --
 
@@ -243,11 +275,17 @@ class OllamaClient:
         files = []
         for f in sorted(Path(gguf_dir).rglob("*.gguf")):
             stat = f.stat()
+            meta = read_gguf_meta(f)
             files.append({
                 "path": str(f),
                 "name": f.name,
                 "size": stat.st_size,
                 "modified": stat.st_mtime,
+                "quantization": meta.get("quantization"),
+                "family": meta.get("family"),
+                "parameter_size": meta.get("parameter_size"),
+                "label": meta.get("label"),
+                "context_length": meta.get("context_length"),
             })
         return files
 

@@ -35,24 +35,33 @@ def auto_discover() -> list[dict[str, Any]]:
     # Docker containers
     try:
         r = subprocess.run(
-            ["docker", "ps", "--format", "{{.ID}}\t{{.Image}}\t{{.Names}}"],
+            ["docker", "ps", "--format", "{{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Ports}}"],
             capture_output=True, text=True, timeout=10,
         )
         for line in r.stdout.strip().split("\n"):
             if not line.strip():
                 continue
-            cid, image, cname = line.split("\t")
-            if "ollama" in image.lower():
-                gguf_dir, container_gguf_dir = _detect_container_mounts(cid)
-                instances.append({
-                    "type": "docker",
-                    "name": f"Docker — {cname}",
-                    "url": "http://localhost:11434",
-                    "container_id": cid,
-                    "api_key": None,
-                    "gguf_dir": gguf_dir,
-                    "container_gguf_dir": container_gguf_dir,
-                })
+            parts = line.split("\t")
+            if len(parts) < 4:
+                continue
+            cid, image, cname, ports = parts[0], parts[1], parts[2], parts[3]
+            is_ollama = False
+            if "ollama/ollama" in image.lower():
+                is_ollama = True
+            elif "ollama" in image.lower() and "11434" in ports:
+                is_ollama = True
+            if not is_ollama:
+                continue
+            gguf_dir, container_gguf_dir = _detect_container_mounts(cid)
+            instances.append({
+                "type": "docker",
+                "name": f"Docker — {cname}",
+                "url": "http://localhost:11434",
+                "container_id": cid,
+                "api_key": None,
+                "gguf_dir": gguf_dir,
+                "container_gguf_dir": container_gguf_dir,
+            })
     except (FileNotFoundError, subprocess.TimeoutExpired, subprocess.CalledProcessError):
         pass
 

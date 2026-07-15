@@ -29,6 +29,8 @@ API.upload = async (p, fd) => {
 let instances = [];
 let selectedInstanceId = null;
 let currentPage = 'models';
+let sortColumn = 'name';
+let sortDir = 'asc';
 
 function $(sel) { return document.querySelector(sel); }
 function $$(sel) { return document.querySelectorAll(sel); }
@@ -79,17 +81,60 @@ async function loadInstanceSelector() {
   }
 }
 
+function parseParamSize(s) {
+  if (!s || s === '—') return 0;
+  const m = s.match(/^([\d.]+)\s*([BKMGTPE])/i);
+  if (!m) return parseFloat(s) || 0;
+  const units = { b: 1, k: 1024, m: 1024**2, g: 1024**3, t: 1024**4 };
+  return parseFloat(m[1]) * (units[m[2].toLowerCase()] || 1);
+}
+
+function parseSize(s) {
+  if (typeof s === 'number') return s;
+  if (!s || s === '—') return 0;
+  const m = s.match(/^([\d.]+)\s*([BKMGTPE])/i);
+  if (!m) return parseFloat(s) || 0;
+  const units = { b: 1, k: 1024, m: 1024**2, g: 1024**3, t: 1024**4 };
+  return parseFloat(m[1]) * (units[m[2].toLowerCase()] || 1);
+}
+
+function sortModels(models) {
+  const col = sortColumn;
+  const dir = sortDir === 'asc' ? 1 : -1;
+  const sorted = [...models].sort((a, b) => {
+    let va, vb;
+    if (col === 'name') { va = a.name || ''; vb = b.name || ''; return dir * va.localeCompare(vb); }
+    if (col === 'family') { va = a.family || ''; vb = b.family || ''; return dir * va.localeCompare(vb); }
+    if (col === 'param') { va = parseParamSize(a.parameter_size); vb = parseParamSize(b.parameter_size); return dir * (va - vb); }
+    if (col === 'quant') { va = a.quantization_level || ''; vb = b.quantization_level || ''; return dir * va.localeCompare(vb); }
+    if (col === 'size') { va = parseSize(a.size); vb = parseSize(b.size); return dir * (va - vb); }
+    return 0;
+  });
+  return sorted;
+}
+
+function setSort(col) {
+  if (sortColumn === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortColumn = col; sortDir = 'asc'; }
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.toggle('asc', th.dataset.sort === sortColumn && sortDir === 'asc');
+    th.classList.toggle('desc', th.dataset.sort === sortColumn && sortDir === 'desc');
+  });
+  loadModels();
+}
+
 // --- Models page ---
 async function loadModels() {
   const tbody = document.getElementById('models-tbody');
   if (!selectedInstanceId) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Select an instance</td></tr>'; return; }
   tbody.innerHTML = '<tr><td colspan="6" class="empty"><div class="spinner"></div></td></tr>';
   try {
-    const models = await API.get(`/api/models/${selectedInstanceId}`);
-    if (!models.length) {
+    const raw = await API.get(`/api/models/${selectedInstanceId}`);
+    if (!raw.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty">No models found</td></tr>';
       return;
     }
+    const models = sortModels(raw);
     tbody.innerHTML = models.map(m => `
       <tr>
         <td><strong>${m.name}</strong></td>
@@ -359,10 +404,27 @@ async function loadGgufLibrary() {
     container.innerHTML = '<div class="gguf-grid">' + files.map(f => {
       const size = formatSize(f.size);
       const suggested = f.name.replace(/\.gguf$/i, '').toLowerCase().replace(/_/g, '');
+      const ctx = f.context_length ? (f.context_length >= 1000 ? `${(f.context_length / 1000).toFixed(0)}K` : `${f.context_length}`) : null;
+      const cols = [];
+      if (f.parameter_size) cols.push(f.parameter_size);
+      if (f.quantization) cols.push(f.quantization);
+      if (ctx) cols.push(ctx);
+      const infoLine = cols.join(' · ');
       return `
         <div class="gguf-card">
-          <div class="name">${escapeHtml(f.name)}</div>
-          <div class="meta">${size}</div>
+          <div class="gguf-card-top">
+            <span class="gguf-card-filename">${escapeHtml(f.name)}</span>
+            <span class="gguf-card-size">${size}</span>
+          </div>
+          <div class="gguf-card-mid">
+            <span class="gguf-card-model">${f.label ? escapeHtml(f.label) : '—'}</span>
+            <span class="gguf-card-family">${f.family || '—'}</span>
+          </div>
+          <div class="gguf-card-info">
+            <span class="ginfo-left">${f.parameter_size || '—'}</span>
+            <span class="ginfo-center">${f.quantization || '—'}</span>
+            <span class="ginfo-right">${ctx || '—'}</span>
+          </div>
           <div class="actions">
             <button class="btn btn-sm btn-primary" onclick="importGgufFromLibrary('${escapeHtml(f.path)}', '${escapeHtml(suggested)}')">Import</button>
           </div>
@@ -426,7 +488,8 @@ function escapeHtml(str) {
 }
 
 function formatSize(bytes) {
-  if (!bytes) return '—';
+  if (!bytes && bytes !== 0) return '—';
+  if (typeof bytes === 'string') return bytes;
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let i = 0;
   let size = bytes;
@@ -439,9 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('header nav button[data-page]').forEach(btn => {
     btn.addEventListener('click', () => showPage(btn.dataset.page));
   });
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => setSort(th.dataset.sort));
+  });
   document.getElementById('modal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal();
   });
   loadInstanceSelector();
   showPage('models');
+  const defaultTh = document.querySelector('th.sortable[data-sort="name"]');
+  if (defaultTh) defaultTh.classList.add('asc');
 });
