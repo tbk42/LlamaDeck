@@ -37,3 +37,4 @@
 - `.env` added to `.gitignore` to prevent accidental secret commits
 - `AGENTS.md` removed from repo (git-ignored) to avoid confusing end users
 - `.dockerignore` added to exclude `.venv/`, `__pycache__/`, `.git/` from Docker build context
+- Dependency list removed from `pyproject.toml` — `requirements.txt` is now the single source of truth for deps
