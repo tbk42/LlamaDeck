@@ -19,11 +19,19 @@ def _detect_container_mounts(container_id: str) -> tuple[str | None, str | None]
             return None, None
         import json
         mounts = json.loads(r.stdout)
+        gguf_src = gguf_dst = first_src = first_dst = None
         for m in mounts:
             src = m.get("Source")
             dst = m.get("Destination")
-            if src and dst:
-                return src, dst
+            if not src or not dst:
+                continue
+            if first_src is None:
+                first_src, first_dst = src, dst
+            if "gguf" in dst.lower() or "gguf" in src.lower():
+                gguf_src, gguf_dst = src, dst
+        if gguf_src:
+            return gguf_src, gguf_dst
+        return first_src, first_dst
     except Exception:
         pass
     return None, None
