@@ -1,4 +1,4 @@
-# LlamaDeck — Requirements
+# LlamaDeck — Design
 
 Build a fully functional web UI for managing Ollama models — Runs independently on its own port/entrypoint.
 
