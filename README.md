@@ -32,6 +32,8 @@ python -m backend.main
 
 Open http://localhost:11435
 
+![LlamaDeck screenshot](screenshot.png)
+
 ### Docker
 
 ```bash
