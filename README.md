@@ -18,6 +18,11 @@ Web UI for managing Ollama models — list, import GGUF, pull from registry/Hugg
 - **Background tasks** — long operations (pull, import) run asynchronously with status polling
 - **Encrypted credentials** — API keys stored in SQLite with Fernet encryption at rest
 
+## Prerequisites
+
+- **Ollama** must be installed and running (`ollama serve`). Get it at [ollama.com](https://ollama.com).
+- Python 3.10+
+
 ## Quick Start
 
 ```bash
@@ -34,7 +39,7 @@ cp .env.example .env   # edit platform-specific settings if needed
 docker compose up -d
 ```
 
-The Docker socket is mounted so the manager can discover sibling Ollama containers and import GGUF files via `docker cp`.
+An Ollama container must also be running on the same host for the manager to discover. The manager connects via the Docker socket to discover and communicate with sibling Ollama containers.
 On Windows (Docker Desktop), set `DOCKER_SOCKET=//./pipe/docker_engine` in `.env` before starting.
 
 ## Configuration
