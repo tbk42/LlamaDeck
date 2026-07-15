@@ -20,3 +20,4 @@
 - GGUF upload failing with "There was an error parsing the body" due to missing `python-multipart` dependency in server runtime
 - GGUF array metadata parsing in header reader (handles typed arrays correctly without desync)
 - GGUF metadata fallback from filename when file_type header values don't match known quantization labels
+- Multipart parser ignoring form fields (instance_id, model_name) sent after the file field — `is_file_part` flag now resets per-part instead of relying on global `dest_file` state
