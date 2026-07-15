@@ -157,19 +157,21 @@ async function loadModels() {
     const models = sortModels(raw);
     tbody.innerHTML = models.map(m => `
       <tr>
-        <td><strong>${m.name}</strong></td>
+        <td>
+          <strong>${m.name}</strong>
+          <span class="model-actions">
+            <button class="btn btn-xs" onclick="inspectModel('${escapeHtml(m.name)}')">View</button>
+            <button class="btn btn-xs btn-danger" onclick="deleteModel('${escapeHtml(m.name)}')">Del</button>
+          </span>
+        </td>
         <td>${m.family || '—'}</td>
         <td>${m.parameter_size || '—'}</td>
         <td>${m.quantization_level || '—'}</td>
         <td>${formatSize(m.size)}</td>
-        <td>
-          <button class="btn btn-sm" onclick="inspectModel('${m.name}')">Inspect</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteModel('${m.name}')">Delete</button>
-        </td>
       </tr>
     `).join('');
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty">Error: ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">Error: ${e.message}</td></tr>`;
   }
 }
 
