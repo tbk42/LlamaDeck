@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import tempfile
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -13,7 +14,7 @@ from backend.services.task_manager import start_background
 
 router = APIRouter(prefix="/api/import", tags=["import"])
 
-UPLOAD_DIR = Path("/unified/tmp/ollama-manager-uploads")
+UPLOAD_DIR = Path(tempfile.gettempdir()) / "ollama-manager-uploads"
 CHUNK_SIZE = 1024 * 1024
 
 

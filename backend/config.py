@@ -8,7 +8,7 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 DB_PATH = CONFIG_DIR / "instances.db"
 
 DEFAULT_PORT = 11435
-DEFAULT_GGUF_DIR = str(Path.cwd() / "GGUF Models")
+DEFAULT_GGUF_DIR = str(Path.home() / "GGUF-Models")
 DEFAULT_HOST = "0.0.0.0"
 
 

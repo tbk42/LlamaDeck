@@ -30,10 +30,12 @@ Open http://localhost:11435
 ### Docker
 
 ```bash
+cp .env.example .env   # edit platform-specific settings if needed
 docker compose up -d
 ```
 
 The Docker socket is mounted so the manager can discover sibling Ollama containers and import GGUF files via `docker cp`.
+On Windows (Docker Desktop), set `DOCKER_SOCKET=//./pipe/docker_engine` in `.env` before starting.
 
 ## Configuration
 

@@ -44,23 +44,6 @@ def _derive_key(secret: bytes, salt: bytes) -> bytes:
     return base64.urlsafe_b64encode(kdf.derive(secret))
 
 
-def _get_machine_secret() -> bytes:
-    candidates = [
-        "/etc/machine-id",
-        "/var/lib/dbus/machine-id",
-        "/etc/hostid",
-    ]
-    for path in candidates:
-        try:
-            data = Path(path).read_bytes().strip()
-            if data:
-                return data
-        except OSError:
-            continue
-    import socket
-    return socket.gethostname().encode()
-
-
 def _get_encryption_key() -> bytes:
     global _encryption_key
     if _encryption_key is not None:

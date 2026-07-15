@@ -50,4 +50,4 @@ Build a fully functional web UI for managing Ollama models — Runs independentl
 
 - Detect Ollama instances among docker containers
 - Support for registering multiple Ollama instances to select from (containerized via docker, local install, remote hosts). Tracks current models and GGUF directory per instance.
-- The `/unified/GGUF Models/import.sh` script is a working reference for the Docker exec pattern
+- The `docker exec` pattern is used for communicating with containerized Ollama instances

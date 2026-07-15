@@ -2,11 +2,8 @@ from __future__ import annotations
 
 import argparse
 import os
-import tempfile
 from contextlib import asynccontextmanager
 from pathlib import Path
-
-tempfile.tempdir = "/unified/tmp"
 
 import uvicorn
 from fastapi import FastAPI

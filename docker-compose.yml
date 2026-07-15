@@ -5,15 +5,18 @@ services:
     ports:
       - "11435:11435"
     volumes:
-      # Docker socket so the manager can discover and docker-exec into
-      # sibling Ollama containers.
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Docker socket for discovering sibling Ollama containers.
+      # Override DOCKER_SOCKET in .env for your platform:
+      #   Linux / macOS:        /var/run/docker.sock
+      #   Windows (Docker Desktop): //./pipe/docker_engine
+      #   Windows (WSL):        /var/run/docker.sock
+      - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:ro
 
       # Persist registered instances and config across restarts.
       - ollama-manager-config:/root/.config/ollama-manager
 
-      # GGUF models directory — adjust the host path to match your setup.
-      - "/unified/GGUF Models:/GGUF:ro"
+      # GGUF models directory — change the host path to match your setup.
+      - ./GGUF-Models:/GGUF:ro
 
     environment:
       - OLLAMA_MANAGER_HOST=0.0.0.0
