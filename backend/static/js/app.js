@@ -158,10 +158,9 @@ async function loadModels() {
     tbody.innerHTML = models.map(m => `
       <tr>
         <td>
-          <strong>${m.name}</strong>
+          <a class="model-name" onclick="inspectModel('${escapeHtml(m.name)}')">${m.name}</a>
           <span class="model-actions">
-            <button class="btn btn-xs" onclick="inspectModel('${escapeHtml(m.name)}')">View</button>
-            <button class="btn btn-xs btn-danger" onclick="deleteModel('${escapeHtml(m.name)}')">Del</button>
+            <button class="btn btn-xs btn-danger" onclick="event.stopPropagation();deleteModel('${escapeHtml(m.name)}')">Del</button>
           </span>
         </td>
         <td>${m.family || '—'}</td>
