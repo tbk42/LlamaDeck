@@ -1,6 +1,6 @@
 # LlamaDeck
 
-Web UI for managing Ollama models — list, import GGUF, pull from registry/HuggingFace, inspect, and delete. Runs as a standalone server on its own port.
+Web UI for managing Ollama models across local, Docker, and remote instances — import GGUF files, pull from HuggingFace, and browse your model library.
 
 ## Features
 

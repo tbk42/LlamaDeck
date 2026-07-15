@@ -1,5 +1,5 @@
 [project]
 name = "llamadeck"
 version = "1.0.0"
-description = "Web UI for managing Ollama models"
+description = "Web UI for managing Ollama models across local, Docker, and remote instances — import GGUF files, pull from HuggingFace, and browse your model library."
 requires-python = ">=3.10"
