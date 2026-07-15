@@ -11,5 +11,5 @@
   <!-- Chess knight (Material Design, solid) -->
   <path d="M200-80v-160q0-23 12-41.5t32-29.5l196-99v-70l-139 69q-12 6-25 9t-26 3q-31 0-58.5-16T149-461q-14-27-12-57.5t19-56.5l124-185-80-120h240q133 0 226.5 93T760-560v480H200Z"
         fill="#2f6bff"
-        transform="translate(50,56) scale(0.065) translate(-480,480)"/>
+        transform="translate(50,54) scale(0.081) translate(-480,480)"/>
 </svg>
