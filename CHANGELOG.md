@@ -5,7 +5,7 @@
 ## [0.1.1] - 2026-07-15
 
 ### Changed
-- Repository fully rewritten with new name **LlamaDeck** (was `ollama-model-manager`)
+- Repository fully rewritten with new project name
 - Git history cleaned: no traces of old project name in any commit
 - Docker image now published as `ghcr.io/tbk42/llamadeck`
 
