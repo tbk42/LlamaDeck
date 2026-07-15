@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-07-15
+
 ### Added
 - GGUF header parsing — quantization, family, parameter size, model name, and context length extracted directly from GGUF files without importing
 - GGUF library cards now show metadata: model name, family, parameter count, quantization, and context length in a structured layout
@@ -9,6 +11,11 @@
 - Parameter count estimation from architecture metadata when `general.size_label` is missing (handles dense and MoE architectures)
 - Context length detection from architecture-specific metadata keys
 - `.env.example` with documented `DOCKER_SOCKET` variable for cross-platform socket paths
+- First-run welcome dialog when no instances are registered (Auto-Discover / Add Manually / Skip)
+- Unit tests (45 tests) for `gguf_parser.py` and `suggest_name()`
+- CI workflow (`.github/workflows/test.yml`) — runs tests on push/PR for Python 3.10 and 3.12
+- Release workflow (`.github/workflows/release.yml`) — tag `v*` triggers Docker build, GHCR push, and GitHub Release
+- GitHub community files: issue templates, PR template, contributing guide
 
 ### Changed
 - GGUF upload now streams directly to the final destination file, eliminating temporary file double-write
@@ -22,6 +29,8 @@
   - Docker compose GGUF volume changed from `/unified/GGUF Models` to `./GGUF-Models` (relative to project)
   - Docker socket path made configurable via `DOCKER_SOCKET` env var, with platform defaults documented in `.env.example`
   - Removed dead `_get_machine_secret()` function from credential store (encryption uses a stored random secret, not machine-id)
+- Ollama/Docker error messages now show clear suggestions instead of raw `FileNotFoundError` → 500
+- Windows guidance updated: WSL 2 supported, native Docker Desktop named pipes not
 
 ### Fixed
 - GGUF upload failing with "No space left on device" when `/tmp` partition was too small
@@ -38,3 +47,7 @@
 - `AGENTS.md` removed from repo (git-ignored) to avoid confusing end users
 - `.dockerignore` added to exclude `.venv/`, `__pycache__/`, `.git/` from Docker build context
 - Dependency list removed from `pyproject.toml` — `requirements.txt` is now the single source of truth for deps
+- `_normalize_arch()` incorrectly matched `qwen2` as `qwen2moe` — now checks exact matches before prefix matches
+- `_normalize_arch()` failed to match `command_r` (underscore in known name) — now normalizes both sides of comparison
+
+[0.1.0]: https://github.com/tbk42/LlamaDeck/releases/tag/v0.1.0
