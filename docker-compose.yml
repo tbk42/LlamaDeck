@@ -13,12 +13,13 @@ services:
       - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:ro
 
       # Persist registered instances and config across restarts.
-      - llamadeck-config:/root/.config/llamadeck
+      - llamadeck-config:/data
 
       # GGUF models directory — change the host path to match your setup.
       - ./GGUF-Models:/GGUF:ro
 
     environment:
+      - LLAMADECK_CONFIG_DIR=/data
       - OLLAMA_MANAGER_HOST=0.0.0.0
       - OLLAMA_MANAGER_PORT=11435
     restart: unless-stopped

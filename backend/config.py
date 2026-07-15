@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
-CONFIG_DIR = Path.home() / ".config" / "llamadeck"
+CONFIG_DIR = Path(os.environ.get("LLAMADECK_CONFIG_DIR", Path.home() / ".config" / "llamadeck"))
 CONFIG_FILE = CONFIG_DIR / "config.json"
 DB_PATH = CONFIG_DIR / "instances.db"
 
