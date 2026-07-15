@@ -44,8 +44,8 @@ app.include_router(tasks.router)
 
 def main():
     parser = argparse.ArgumentParser(description="LlamaDeck")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("OLLAMA_MANAGER_PORT", settings.port)))
-    parser.add_argument("--host", default=os.environ.get("OLLAMA_MANAGER_HOST", settings.host))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("LLAMADECK_PORT", os.environ.get("OLLAMA_MANAGER_PORT", settings.port))))
+    parser.add_argument("--host", default=os.environ.get("LLAMADECK_HOST", os.environ.get("OLLAMA_MANAGER_HOST", settings.host)))
     parser.add_argument("--gguf-dir", default=settings.gguf_dir)
     args = parser.parse_args()
 

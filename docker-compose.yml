@@ -20,8 +20,8 @@ services:
 
     environment:
       - LLAMADECK_CONFIG_DIR=/data
-      - OLLAMA_MANAGER_HOST=0.0.0.0
-      - OLLAMA_MANAGER_PORT=11435
+      - LLAMADECK_HOST=0.0.0.0
+      - LLAMADECK_PORT=11435
     restart: unless-stopped
 
 volumes:
