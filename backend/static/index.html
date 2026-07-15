@@ -27,62 +27,71 @@
     <!-- Models -->
     <div id="page-models" class="page active">
       <h2>Models</h2>
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" data-sort="name">Name <span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="family">Family <span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="param">Params <span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="quant">Quantization <span class="sort-arrow"></span></th>
-            <th class="sortable" data-sort="size">Size <span class="sort-arrow"></span></th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="models-tbody">
-          <tr><td colspan="6" class="empty">Select an instance</td></tr>
-        </tbody>
-      </table>
+      <div class="page-no-instance" style="display:none;"><div class="empty">Select an instance from the bar above</div></div>
+      <div class="page-instance-dependent">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="name">Name <span class="sort-arrow"></span></th>
+              <th class="sortable" data-sort="family">Family <span class="sort-arrow"></span></th>
+              <th class="sortable" data-sort="param">Params <span class="sort-arrow"></span></th>
+              <th class="sortable" data-sort="quant">Quantization <span class="sort-arrow"></span></th>
+              <th class="sortable" data-sort="size">Size <span class="sort-arrow"></span></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="models-tbody">
+            <tr><td colspan="6" class="empty">No models found</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Import GGUF -->
     <div id="page-import" class="page">
       <h2>Import GGUF</h2>
-      <form id="import-form" style="max-width: 500px;">
-        <div class="form-group">
-          <label>GGUF File</label>
-          <input type="file" id="import-file" accept=".gguf" required>
-        </div>
-        <div class="form-group">
-          <label>Model Name (auto-suggested)</label>
-          <input type="text" id="import-name" placeholder="e.g. my-model">
-        </div>
-        <button type="submit" class="btn btn-primary">Import</button>
-      </form>
+      <div class="page-no-instance" style="display:none;"><div class="empty">Select an instance from the bar above</div></div>
+      <div class="page-instance-dependent">
+        <form id="import-form" style="max-width: 500px;">
+          <div class="form-group">
+            <label>GGUF File</label>
+            <input type="file" id="import-file" accept=".gguf" required>
+          </div>
+          <div class="form-group">
+            <label>Model Name (auto-suggested)</label>
+            <input type="text" id="import-name" placeholder="e.g. my-model">
+          </div>
+          <button type="submit" class="btn btn-primary">Import</button>
+        </form>
+      </div>
     </div>
 
     <!-- Pull -->
     <div id="page-pull" class="page">
       <h2>Pull Models</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;">
-          <h3>Ollama Registry</h3>
-          <div class="form-group">
-            <label>Model name (e.g. llama3.2:3b)</label>
-            <input type="text" id="pull-registry-name" placeholder="llama3.2:3b">
+      <div class="page-no-instance" style="display:none;"><div class="empty">Select an instance from the bar above</div></div>
+      <div class="page-instance-dependent">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;">
+            <h3>Ollama Registry</h3>
+            <div class="form-group">
+              <label>Model name (e.g. llama3.2:3b)</label>
+              <input type="text" id="pull-registry-name" placeholder="llama3.2:3b">
+            </div>
+            <button class="btn btn-primary" onclick="pullRegistry()">Pull</button>
           </div>
-          <button class="btn btn-primary" onclick="pullRegistry()">Pull</button>
-        </div>
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;">
-          <h3>HuggingFace</h3>
-          <div class="form-group">
-            <label>Download URL</label>
-            <input type="url" id="pull-hf-url" placeholder="https://huggingface.co/...">
+          <div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;">
+            <h3>HuggingFace</h3>
+            <div class="form-group">
+              <label>Download URL</label>
+              <input type="url" id="pull-hf-url" placeholder="https://huggingface.co/...">
+            </div>
+            <div class="form-group">
+              <label>API Key (optional, for gated models)</label>
+              <input type="password" id="pull-hf-token">
+            </div>
+            <button class="btn btn-primary" onclick="pullHuggingFace()">Pull</button>
           </div>
-          <div class="form-group">
-            <label>API Key (optional, for gated models)</label>
-            <input type="password" id="pull-hf-token">
-          </div>
-          <button class="btn btn-primary" onclick="pullHuggingFace()">Pull</button>
         </div>
       </div>
     </div>
@@ -102,11 +111,14 @@
     <!-- GGUF Library -->
     <div id="page-gguf" class="page">
       <h2>GGUF Library</h2>
-      <p style="color:#8b949e;font-size:13px;margin-bottom:12px;">
-        Browse local GGUF files and import them into Ollama.
-      </p>
-      <div id="gguf-container">
-        <div class="empty">Select an instance to browse GGUF files</div>
+      <div class="page-no-instance" style="display:none;"><div class="empty">Select an instance from the bar above</div></div>
+      <div class="page-instance-dependent">
+        <p style="color:#8b949e;font-size:13px;margin-bottom:12px;">
+          Browse local GGUF files and import them into Ollama.
+        </p>
+        <div id="gguf-container">
+          <div class="empty">No GGUF files found</div>
+        </div>
       </div>
     </div>
   </main>

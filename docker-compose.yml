@@ -12,9 +12,8 @@ services:
       # Persist registered instances and config across restarts.
       - ollama-manager-config:/root/.config/ollama-manager
 
-      # Optional: mount a host GGUF directory so the GGUF library feature
-      # can browse local models. Adjust the host path to match your setup.
-      # - /path/to/gguf-models:/gguf-models:ro
+      # GGUF models directory — adjust the host path to match your setup.
+      - "/unified/GGUF Models:/GGUF:ro"
 
     environment:
       - OLLAMA_MANAGER_HOST=0.0.0.0

@@ -52,9 +52,25 @@ function showPage(name) {
   $$('header nav button').forEach(b => {
     b.classList.toggle('active', b.dataset.page === name);
   });
-  if (name === 'models' && selectedInstanceId) loadModels();
+
+  const needsInstance = ['models', 'import', 'pull', 'gguf'];
+  if (needsInstance.includes(name)) {
+    if (instances.length === 0) {
+      setTimeout(() => showPage('instances'), 0);
+      return;
+    }
+    $$('.page-instance-dependent').forEach(el => el.style.display = '');
+    $$('.page-no-instance').forEach(el => el.style.display = 'none');
+    if (!selectedInstanceId) {
+      $$('.page-instance-dependent').forEach(el => el.style.display = 'none');
+      $$('.page-no-instance').forEach(el => el.style.display = '');
+      return;
+    }
+  }
+
+  if (name === 'models') loadModels();
   if (name === 'instances') loadInstances();
-  if (name === 'gguf' && selectedInstanceId) loadGgufLibrary();
+  if (name === 'gguf') loadGgufLibrary();
 }
 
 // --- Instance selector ---
@@ -62,6 +78,10 @@ async function loadInstanceSelector() {
   try {
     instances = await API.get('/api/instances');
   } catch { instances = []; }
+  if (instances.length === 0) {
+    document.getElementById('instance-select').innerHTML = '<option value="">No instances</option>';
+    return;
+  }
   const sel = document.getElementById('instance-select');
   sel.innerHTML = '<option value="">-- Select instance --</option>' +
     instances.map(i => `<option value="${i.id}">${i.name} (${i.type})</option>`).join('');
@@ -498,7 +518,7 @@ function formatSize(bytes) {
 }
 
 // --- Init ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('header nav button[data-page]').forEach(btn => {
     btn.addEventListener('click', () => showPage(btn.dataset.page));
   });
@@ -508,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) closeModal();
   });
-  loadInstanceSelector();
+  await loadInstanceSelector();
   showPage('models');
   const defaultTh = document.querySelector('th.sortable[data-sort="name"]');
   if (defaultTh) defaultTh.classList.add('asc');

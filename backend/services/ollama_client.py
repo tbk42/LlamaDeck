@@ -269,7 +269,7 @@ class OllamaClient:
     # -- GGUF library --
 
     def list_gguf_files(self) -> list[dict[str, Any]]:
-        gguf_dir = self.gguf_dir
+        gguf_dir = self.container_gguf_dir or self.gguf_dir
         if not gguf_dir or not Path(gguf_dir).is_dir():
             return []
         files = []
