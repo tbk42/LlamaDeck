@@ -4,6 +4,8 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 
 <img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
 
+<div style="clear:both"></div>
+
 ## Features
 
 - **List models** — name, family, parameter count, quantization, size
