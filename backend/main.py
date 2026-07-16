@@ -44,13 +44,15 @@ app.include_router(tasks.router)
 
 def main():
     parser = argparse.ArgumentParser(description="LlamaDeck")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("LLAMADECK_PORT", settings.port)))
-    parser.add_argument("--host", default=os.environ.get("LLAMADECK_HOST", settings.host))
+    parser.add_argument("--port", type=int, default=settings.port)
+    parser.add_argument("--host", default=settings.host)
     parser.add_argument("--gguf-dir", default=settings.gguf_dir)
     args = parser.parse_args()
 
-    settings.port = args.port
-    settings.host = args.host
+    port = os.environ.get("LLAMADECK_PORT")
+    host = os.environ.get("LLAMADECK_HOST")
+    settings.port = int(port) if port else args.port
+    settings.host = host if host else args.host
     settings.gguf_dir = args.gguf_dir
     settings.save()
 

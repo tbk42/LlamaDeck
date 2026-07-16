@@ -3,7 +3,7 @@ services:
     build: .
     container_name: llamadeck
     ports:
-      - "11435:11435"
+      - ${LLAMADECK_PORT:-11435}:${LLAMADECK_PORT:-11435}
     volumes:
       # Docker socket for discovering sibling Ollama containers.
       # Override DOCKER_SOCKET in .env for your platform:
@@ -13,16 +13,13 @@ services:
       - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock:ro
 
       # Persist registered instances and config across restarts.
-      - llamadeck-config:/data
+      - ./data:${LLAMADECK_CONFIG_DIR:-/data}
 
       # GGUF models directory — change the host path to match your setup.
       - ./GGUF-Models:/GGUF:ro
 
     environment:
-      - LLAMADECK_CONFIG_DIR=/data
-      - LLAMADECK_HOST=0.0.0.0
-      - LLAMADECK_PORT=11435
+      - LLAMADECK_CONFIG_DIR=${LLAMADECK_CONFIG_DIR:-/data}
+      - LLAMADECK_HOST=${LLAMADECK_HOST:-0.0.0.0}
+      - LLAMADECK_PORT=${LLAMADECK_PORT:-11435}
     restart: unless-stopped
-
-volumes:
-  llamadeck-config:
