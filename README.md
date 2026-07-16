@@ -18,7 +18,8 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 - **Background tasks** — long operations (pull, import) run asynchronously with status polling
 - **Encrypted credentials** — API keys stored in SQLite with Fernet encryption at rest
 
-<p align="center"><img src="demo.gif" alt="LlamaDeck demo" width="600"></p>
+<hr>
+<img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
 
 ## Prerequisites
 
