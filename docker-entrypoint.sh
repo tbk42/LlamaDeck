@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+chown -R appuser:appuser "${LLAMADECK_CONFIG_DIR:-/data}" 2>/dev/null || true
+
 SOCKET="/var/run/docker.sock"
 if [ -S "$SOCKET" ]; then
   GID=$(stat -c "%g" "$SOCKET" 2>/dev/null)

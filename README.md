@@ -51,7 +51,7 @@ Native Windows (Docker Desktop named pipes) is **not supported** for Docker sock
 |---|---|
 | CLI flags | `python -m backend.main --port 8080 --host 127.0.0.1` |
 | Environment | `LLAMADECK_HOST=0.0.0.0 LLAMADECK_PORT=11435` |
-| Environment | `LLAMADECK_CONFIG_DIR=/path/to/config` (default: `~/.config/llamadeck`) |
+| Environment | `LLAMADECK_CONFIG_DIR=/path/to/config` (default: `~/.config/llamadeck`, Docker default: `/data`) |
 | Config file | `config.json` inside the config directory |
 
 ## Architecture
