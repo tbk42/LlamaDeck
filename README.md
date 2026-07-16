@@ -2,7 +2,7 @@
 
 Web UI for managing Ollama models across local, Docker, and remote instances — import GGUF files, pull from HuggingFace, and browse your model library.
 
-<video src="demo.mp4" width="400" autoplay loop muted playsinline align="right"></video>
+<img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
 
 ## Features
 
