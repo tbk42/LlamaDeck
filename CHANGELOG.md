@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+- `LLAMADECK_HOST`/`LLAMADECK_PORT` env vars now properly override CLI args (env vars now checked after argument parsing)
+- `/data` directory permissions fixed for bind-mounted volumes (entrypoint now chowns before dropping to appuser)
+
+### Changed
+- Dockerfile CMD/EXPOSE simplified to static values; env vars flow through `main.py` instead
+
 ## [0.1.1] - 2026-07-15
 
 ### Changed
