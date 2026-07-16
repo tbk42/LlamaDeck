@@ -21,6 +21,8 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 <hr>
 <img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
 
+<div style="clear:both"></div>
+
 ## Prerequisites
 
 - **Ollama** must be installed and running (`ollama serve`). Get it at [ollama.com](https://ollama.com).
