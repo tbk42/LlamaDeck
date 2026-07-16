@@ -2,6 +2,10 @@
 
 Web UI for managing Ollama models across local, Docker, and remote instances — import GGUF files, pull from HuggingFace, and browse your model library.
 
+<img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
+
+<div style="clear:both"></div>
+
 ## Features
 
 - **List models** — name, family, parameter count, quantization, size
@@ -17,11 +21,6 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 - **Auto-discovery** — detects running Ollama Docker containers and local installs
 - **Background tasks** — long operations (pull, import) run asynchronously with status polling
 - **Encrypted credentials** — API keys stored in SQLite with Fernet encryption at rest
-
-<hr>
-<img src="demo.gif" alt="LlamaDeck demo" width="400" align="right">
-
-<div style="clear:both"></div>
 
 ## Prerequisites
 
