@@ -4,6 +4,7 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 
 ## Features
 
+- <img src="demo.gif" alt="LlamaDeck demo" width="600">
 - **List models** — name, family, parameter count, quantization, size
 - **Import GGUF** — browser upload or path-based import, with auto-suggest naming and conflict detection
 - **Delete** — with confirmation
@@ -17,8 +18,6 @@ Web UI for managing Ollama models across local, Docker, and remote instances —
 - **Auto-discovery** — detects running Ollama Docker containers and local installs
 - **Background tasks** — long operations (pull, import) run asynchronously with status polling
 - **Encrypted credentials** — API keys stored in SQLite with Fernet encryption at rest
-
-<img src="demo.gif" alt="LlamaDeck demo" width="600">
 
 ## Prerequisites
 
