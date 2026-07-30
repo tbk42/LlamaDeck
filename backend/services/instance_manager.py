@@ -60,11 +60,21 @@ def auto_discover() -> list[dict[str, Any]]:
                 is_ollama = True
             if not is_ollama:
                 continue
+            # Extract published host port from docker ps ports string
+            url = ""
+            for part in ports.split(","):
+                part = part.strip()
+                if "->11434/tcp" in part or "->11434" in part:
+                    host_part = part.split("->")[0].strip()
+                    host = host_part.rsplit(":", 1)[0] if ":" in host_part else "localhost"
+                    port = host_part.rsplit(":", 1)[-1]
+                    url = f"http://{host}:{port}"
+                    break
             gguf_dir, container_gguf_dir = _detect_container_mounts(cid)
             instances.append({
                 "type": "docker",
                 "name": f"Docker — {cname}",
-                "url": "http://localhost:11434",
+                "url": url,
                 "container_id": cid,
                 "api_key": None,
                 "gguf_dir": gguf_dir,

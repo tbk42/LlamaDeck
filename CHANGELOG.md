@@ -5,6 +5,7 @@
 ### Fixed
 - `LLAMADECK_HOST`/`LLAMADECK_PORT` env vars now properly override CLI args (env vars now checked after argument parsing)
 - `/data` directory permissions fixed for bind-mounted volumes (entrypoint now chowns before dropping to appuser)
+- Docker auto-discovery no longer hardcodes `http://localhost:11434` as the URL; it now extracts the actual published host port from `docker ps` output, or sets an empty string if the port is not exposed
 
 ### Changed
 - Dockerfile CMD/EXPOSE simplified to static values; env vars flow through `main.py` instead
